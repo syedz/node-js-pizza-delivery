@@ -1,8 +1,9 @@
-/*
-    Primary file for the API
-*/
+/**
+ * Primary file for the API
+ */
 
 // Dependencies
+var server = require('./lib/server');
 
 // Declare the app
 var app = {};
@@ -10,6 +11,7 @@ var app = {};
 // Initialize function
 app.init = function() {
     // Start the server
+    server.init();
 };
 
 // Execute the app
