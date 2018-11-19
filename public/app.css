@@ -315,18 +315,18 @@ td a:active {
 
 /* Page specific styles for dashboard */
 
-#noChecksMessage td {
+#noInventoryMessage td {
     text-align: center;
     font-style: italic;
     font-size: 20px;
     padding: 20px;
 }
 
-#noChecksMessage {
+#noInventoryMessage {
     display: none;
 }
 
-#createCheckCTA {
+#orderNowCTA {
     margin-top: 40px;
     display: none;
 }

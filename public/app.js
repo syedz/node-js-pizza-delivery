@@ -371,8 +371,8 @@ app.loadDataOnPage = function() {
     }
 
     // Logic for dashboard page
-    if (primaryClass == 'checksList') {
-        app.loadChecksListPage();
+    if (primaryClass == 'inventoryList') {
+        app.loadInventoryListPage();
     }
 
     // Logic for check details page
@@ -416,13 +416,14 @@ app.loadAccountEditPage = function() {
 };
 
 // Load the dashboard page specifically
-app.loadChecksListPage = function() {
-    // Get the phone number from the current token, or log the user out if none is there
-    var phone = typeof app.config.sessionToken.phone == 'string' ? app.config.sessionToken.phone : false;
-    if (phone) {
+app.loadInventoryListPage = function() {
+    // Get the email from the current token, or log the user out if none is there
+    var email = typeof app.config.sessionToken.email == 'string' ? app.config.sessionToken.email : false;
+
+    if (email) {
         // Fetch the user data
         var queryStringObject = {
-            phone: phone
+            email: email
         };
         app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, function(
             statusCode,
@@ -477,8 +478,8 @@ app.loadChecksListPage = function() {
                         document.getElementById('createCheckCTA').style.display = 'block';
                     }
                 } else {
-                    // Show 'you have no checks' message
-                    document.getElementById('noChecksMessage').style.display = 'table-row';
+                    // Show 'There is nothing in inventory' message
+                    document.getElementById('noInventoryMessage').style.display = 'table-row';
 
                     // Show the createCheck CTA
                     document.getElementById('createCheckCTA').style.display = 'block';
