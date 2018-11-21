@@ -131,11 +131,15 @@ app.bindForms = function() {
                 var method = this.method.toUpperCase();
 
                 // Hide the error message (if it's currently shown due to a previous error)
-                document.querySelector('#' + formId + ' .formError').style.display = 'none';
+                var errorMessage = document.querySelector('#' + formId + ' .formError');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none';
+                }
 
                 // Hide the success message (if it's currently shown due to a previous error)
-                if (document.querySelector('#' + formId + ' .formSuccess')) {
-                    document.querySelector('#' + formId + ' .formSuccess').style.display = 'none';
+                var successMessage = document.querySelector('#' + formId + ' .formSuccess');
+                if (successMessage) {
+                    successMessage.style.display = 'none';
                 }
 
                 // Turn the inputs into a payload
@@ -251,6 +255,7 @@ app.formResponseProcessor = function(formId, requestPayload, responsePayload) {
             }
         });
     }
+
     // If login was successful, set the token in localstorage and redirect the user
     if (formId == 'sessionCreate') {
         app.setSessionToken(responsePayload);
@@ -270,12 +275,12 @@ app.formResponseProcessor = function(formId, requestPayload, responsePayload) {
     }
 
     // If the user just created a new check successfully, redirect back to the dashboard
-    if (formId == 'checksCreate') {
+    if (formId == 'inventoryCreate') {
         window.location = '/inventory/all';
     }
 
     // If the user just deleted a check, redirect them to the dashboard
-    if (formId == 'checksEdit2') {
+    if (formId == 'inventoryEdit2') {
         window.location = '/inventory/all';
     }
 };
@@ -374,11 +379,6 @@ app.loadDataOnPage = function() {
     if (primaryClass == 'inventoryList') {
         app.loadInventoryListPage();
     }
-
-    // Logic for check details page
-    if (primaryClass == 'checksEdit') {
-        app.loadChecksEditPage();
-    }
 };
 
 // Load the account edit page specifically
@@ -448,7 +448,14 @@ app.loadInventoryListPage = function() {
                         td0.innerHTML = item.id;
                         td1.innerHTML = item.name;
                         td2.innerHTML = '$' + item.price;
-                        td3.innerHTML = '<a">Add to cart</a>';
+
+                        var addToCartButton = document.createElement('button');
+                        addToCartButton.innerHTML = 'Add to Cart';
+                        addToCartButton.onclick = function() {
+                            app.addToCart(item.id, 1);
+                        };
+
+                        td3.appendChild(addToCartButton);
                     });
                 } else {
                     // Show 'There is nothing in inventory' message
@@ -467,50 +474,16 @@ app.loadInventoryListPage = function() {
     }
 };
 
-// Load the checks edit page specifically
-app.loadChecksEditPage = function() {
-    // Get the check id from the query string, if none is found then redirect back to dashboard
-    var id =
-        typeof window.location.href.split('=')[1] == 'string' && window.location.href.split('=')[1].length > 0
-            ? window.location.href.split('=')[1]
-            : false;
-    if (id) {
-        // Fetch the check data
-        var queryStringObject = {
-            id: id
-        };
-        app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, function(
-            statusCode,
-            responsePayload
-        ) {
-            if (statusCode == 200) {
-                // Put the hidden id field into both forms
-                var hiddenIdInputs = document.querySelectorAll('input.hiddenIdInput');
-                for (var i = 0; i < hiddenIdInputs.length; i++) {
-                    hiddenIdInputs[i].value = responsePayload.id;
-                }
+app.addToCart = function(itemId, quantity) {
+    var payload = {
+        itemId: itemId,
+        quantity: quantity
+    };
 
-                // Put the data into the top form as values where needed
-                document.querySelector('#checksEdit1 .displayIdInput').value = responsePayload.id;
-                document.querySelector('#checksEdit1 .displayStateInput').value = responsePayload.state;
-                document.querySelector('#checksEdit1 .protocolInput').value = responsePayload.protocol;
-                document.querySelector('#checksEdit1 .urlInput').value = responsePayload.url;
-                document.querySelector('#checksEdit1 .methodInput').value = responsePayload.method;
-                document.querySelector('#checksEdit1 .timeoutInput').value = responsePayload.timeoutSeconds;
-                var successCodeCheckboxes = document.querySelectorAll('#checksEdit1 input.successCodesInput');
-                for (var i = 0; i < successCodeCheckboxes.length; i++) {
-                    if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
-                        successCodeCheckboxes[i].checked = true;
-                    }
-                }
-            } else {
-                // If the request comes back as something other than 200, redirect back to dashboard
-                window.location = '/checks/all';
-            }
-        });
-    } else {
-        window.location = '/checks/all';
-    }
+    app.client.request(undefined, '/api/cart', 'POST', undefined, payload, function(statusCode, data) {
+        if (statusCode == 200) {
+        }
+    });
 };
 
 // Loop to renew token often

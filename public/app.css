@@ -303,6 +303,7 @@ th {
 
 td {
     padding: 5px;
+    font-size: 17px;
 }
 
 tbody tr {
@@ -315,6 +316,17 @@ td a:active {
     color: #2e5fa8;
     text-decoration: underline;
     cursor: pointer;
+}
+
+td button {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 10px;
+    cursor: pointer;
+}
+td button:hover {
+    background-color: #eee;
 }
 
 /* Page specific styles for dashboard */
