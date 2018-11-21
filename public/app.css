@@ -305,6 +305,10 @@ td {
     padding: 5px;
 }
 
+tbody tr {
+    text-align: center;
+}
+
 td a,
 td a:hover,
 td a:active {

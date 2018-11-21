@@ -421,68 +421,41 @@ app.loadInventoryListPage = function() {
     var email = typeof app.config.sessionToken.email == 'string' ? app.config.sessionToken.email : false;
 
     if (email) {
-        // Fetch the user data
-        var queryStringObject = {
-            email: email
-        };
-        app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, function(
+        // Fetch the inventory data
+        app.client.request(undefined, 'api/inventory', 'GET', undefined, undefined, function(
             statusCode,
             responsePayload
         ) {
             if (statusCode == 200) {
                 // Determine how many checks the user has
-                var allChecks =
-                    typeof responsePayload.checks == 'object' &&
-                    responsePayload.checks instanceof Array &&
-                    responsePayload.checks.length > 0
-                        ? responsePayload.checks
+                var inventory =
+                    typeof responsePayload == 'object' && responsePayload instanceof Array && responsePayload.length > 0
+                        ? responsePayload
                         : [];
-                if (allChecks.length > 0) {
-                    // Show each created check as a new row in the table
-                    allChecks.forEach(function(checkId) {
-                        // Get the data for the check
-                        var newQueryStringObject = {
-                            id: checkId
-                        };
-                        app.client.request(undefined, 'api/checks', 'GET', newQueryStringObject, undefined, function(
-                            statusCode,
-                            responsePayload
-                        ) {
-                            if (statusCode == 200) {
-                                var checkData = responsePayload;
-                                // Make the check data into a table row
-                                var table = document.getElementById('checksListTable');
-                                var tr = table.insertRow(-1);
-                                tr.classList.add('checkRow');
-                                var td0 = tr.insertCell(0);
-                                var td1 = tr.insertCell(1);
-                                var td2 = tr.insertCell(2);
-                                var td3 = tr.insertCell(3);
-                                var td4 = tr.insertCell(4);
-                                td0.innerHTML = responsePayload.method.toUpperCase();
-                                td1.innerHTML = responsePayload.protocol + '://';
-                                td2.innerHTML = responsePayload.url;
-                                var state =
-                                    typeof responsePayload.state == 'string' ? responsePayload.state : 'unknown';
-                                td3.innerHTML = state;
-                                td4.innerHTML =
-                                    '<a href="/checks/edit?id=' + responsePayload.id + '">View / Edit / Delete</a>';
-                            } else {
-                                console.log('Error trying to load check ID: ', checkId);
-                            }
-                        });
-                    });
+                if (inventory.length > 0) {
+                    // Show each inventory item as a new row in the table
+                    inventory.forEach(function(item) {
+                        // Make the item data into a table row
+                        var table = document.getElementById('inventoryListTable');
+                        var tr = table.insertRow(-1);
+                        tr.classList.add('inventoryRow');
 
-                    if (allChecks.length < 5) {
-                        // Show the createCheck CTA
-                        document.getElementById('createCheckCTA').style.display = 'block';
-                    }
+                        var td0 = tr.insertCell(0);
+                        var td1 = tr.insertCell(1);
+                        var td2 = tr.insertCell(2);
+                        var td3 = tr.insertCell(3);
+
+                        td0.innerHTML = item.id;
+                        td1.innerHTML = item.name;
+                        td2.innerHTML = '$' + item.price;
+                        td3.innerHTML = '<a">Add to cart</a>';
+                    });
                 } else {
                     // Show 'There is nothing in inventory' message
                     document.getElementById('noInventoryMessage').style.display = 'table-row';
 
-                    // Show the createCheck CTA
-                    document.getElementById('createCheckCTA').style.display = 'block';
+                    // Show the 'Order Now' CTA
+                    document.getElementById('orderNowCTA').style.display = 'block';
                 }
             } else {
                 // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
