@@ -1,0 +1,31 @@
+<h1>My Cart</h1>
+<hr />
+
+<table id="cartListTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr id="noCartMessage">
+            <td colspan="5">There is nothing in your cart</td>
+        </tr>
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th></th>
+            <th>Total</th>
+            <th id="totalCost"></th>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="ctaWrapper">
+    <a class="cta green" href="/inventory/all">View Menu</a>
+    <a class="cta blue" onclick="app.orderItem();">Order Items</a>
+</div>

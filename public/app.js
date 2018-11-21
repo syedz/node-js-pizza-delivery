@@ -262,25 +262,8 @@ app.formResponseProcessor = function(formId, requestPayload, responsePayload) {
         window.location = '/inventory/all';
     }
 
-    // If forms saved successfully and they have success messages, show them
-    var formsWithSuccessMessages = ['accountEdit1', 'accountEdit2', 'checksEdit1'];
-    if (formsWithSuccessMessages.indexOf(formId) > -1) {
-        document.querySelector('#' + formId + ' .formSuccess').style.display = 'block';
-    }
-
-    // If the user just deleted their account, redirect them to the account-delete page
-    if (formId == 'accountEdit3') {
-        app.logUserOut(false);
-        window.location = '/account/deleted';
-    }
-
     // If the user just created a new check successfully, redirect back to the dashboard
     if (formId == 'inventoryCreate') {
-        window.location = '/inventory/all';
-    }
-
-    // If the user just deleted a check, redirect them to the dashboard
-    if (formId == 'inventoryEdit2') {
         window.location = '/inventory/all';
     }
 };
@@ -370,43 +353,58 @@ app.loadDataOnPage = function() {
     var bodyClasses = document.querySelector('body').classList;
     var primaryClass = typeof bodyClasses[0] == 'string' ? bodyClasses[0] : false;
 
-    // Logic for account settings page
-    if (primaryClass == 'accountEdit') {
-        app.loadAccountEditPage();
-    }
-
     // Logic for dashboard page
     if (primaryClass == 'inventoryList') {
         app.loadInventoryListPage();
     }
+
+    // Logic for cart
+    if (primaryClass == 'cartList') {
+        app.loadCartPage();
+    }
 };
 
-// Load the account edit page specifically
-app.loadAccountEditPage = function() {
-    // Get the phone number from the current token, or log the user out if none is there
-    var phone = typeof app.config.sessionToken.phone == 'string' ? app.config.sessionToken.phone : false;
-    if (phone) {
+// Load the cart page specifically
+app.loadCartPage = function() {
+    // Get the email from the current token, or log the user out if none is there
+    var email = typeof app.config.sessionToken.email == 'string' ? app.config.sessionToken.email : false;
+    if (email) {
         // Fetch the user data
         var queryStringObject = {
-            phone: phone
+            email: email
         };
+
         app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, function(
             statusCode,
             responsePayload
         ) {
             if (statusCode == 200) {
-                // Put the data into the forms as values where needed
-                document.querySelector('#accountEdit1 .firstNameInput').value = responsePayload.firstName;
-                document.querySelector('#accountEdit1 .lastNameInput').value = responsePayload.lastName;
-                document.querySelector('#accountEdit1 .displayPhoneInput').value = responsePayload.phone;
+                var cart = responsePayload.cart;
+                var table = document.getElementById('cartListTable');
 
-                // Put the hidden phone field into both forms
-                var hiddenPhoneInputs = document.querySelectorAll('input.hiddenPhoneNumberInput');
-                for (var i = 0; i < hiddenPhoneInputs.length; i++) {
-                    hiddenPhoneInputs[i].value = responsePayload.phone;
+                if (cart.length > 0) {
+                    var total = 0;
+                    cart.forEach(function(item) {
+                        var tr = table.insertRow(1);
+                        tr.classList.add('cartRow');
+
+                        var td0 = tr.insertCell(0);
+                        var td1 = tr.insertCell(1);
+                        var td2 = tr.insertCell(2);
+
+                        td0.innerHTML = item.itemId;
+                        td1.innerHTML = item.quantity;
+                        td2.innerHTML = '$' + parseFloat(item.subtotal).toFixed(2);
+
+                        total += item.subtotal;
+                        document.getElementById('totalCost').innerHTML = '$' + parseFloat(total).toFixed(2);
+                    });
+                } else {
+                    // Show 'There is nothing in cart' message
+                    document.getElementById('noCartMessage').style.display = 'table-row';
                 }
             } else {
-                // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+                // If the request comes back as something other than 200, log the user our (on the assumption that the API is temporarily down or the users token is bad)
                 app.logUserOut();
             }
         });
@@ -433,10 +431,11 @@ app.loadInventoryListPage = function() {
                         ? responsePayload
                         : [];
                 if (inventory.length > 0) {
+                    // Make the item data into a table row
+                    var table = document.getElementById('inventoryListTable');
+
                     // Show each inventory item as a new row in the table
                     inventory.forEach(function(item) {
-                        // Make the item data into a table row
-                        var table = document.getElementById('inventoryListTable');
                         var tr = table.insertRow(-1);
                         tr.classList.add('inventoryRow');
 
@@ -447,7 +446,7 @@ app.loadInventoryListPage = function() {
 
                         td0.innerHTML = item.id;
                         td1.innerHTML = item.name;
-                        td2.innerHTML = '$' + item.price;
+                        td2.innerHTML = '$' + parseFloat(item.price).toFixed(2);
 
                         var addToCartButton = document.createElement('button');
                         addToCartButton.innerHTML = 'Add to Cart';
@@ -481,6 +480,14 @@ app.addToCart = function(itemId, quantity) {
     };
 
     app.client.request(undefined, '/api/cart', 'POST', undefined, payload, function(statusCode, data) {
+        if (statusCode == 200) {
+        }
+    });
+};
+app.orderItem = function() {
+    var payload = {};
+
+    app.client.request(undefined, '/api/orders', 'POST', undefined, payload, function(statusCode, data) {
         if (statusCode == 200) {
         }
     });

@@ -293,6 +293,7 @@ tr {
 th {
     text-transform: uppercase;
     font-weight: bold;
+    font-size: 17px;
     padding: 10px;
     border-color: #000;
     border-style: dotted;
@@ -306,7 +307,8 @@ td {
     font-size: 17px;
 }
 
-tbody tr {
+tbody tr,
+tfoot tr {
     text-align: center;
 }
 
@@ -331,14 +333,16 @@ td button:hover {
 
 /* Page specific styles for dashboard */
 
-#noInventoryMessage td {
+#noInventoryMessage td,
+#noCartMessage td {
     text-align: center;
     font-style: italic;
     font-size: 20px;
     padding: 20px;
 }
 
-#noInventoryMessage {
+#noInventoryMessage,
+#noCartMessage {
     display: none;
 }
 
