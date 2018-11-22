@@ -350,3 +350,9 @@ td button:hover {
     margin-top: 40px;
     display: none;
 }
+
+#pizza-img {
+    width: 200px;
+    display: block;
+    margin: 0 auto;
+}
